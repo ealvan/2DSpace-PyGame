@@ -25,6 +25,7 @@ pygame.display.set_icon(icon)
 
 # player
 playerimg = pygame.image.load('transport.png')
+playerwidth = 110
 playerx = 370
 playery = 520
 playerx_change = 0
@@ -36,8 +37,11 @@ enemyy = []
 enemyx_change = []
 enemyy_change = []
 number_of_enemies = 6
-enemy_speed_x = 1.0  # Velocidad inicial de los enemigos
-enemy_speed_y = 1.0  # Velocidad inicial de los enemigos
+enemy_speed_x = 0.5  # Velocidad inicial de los enemigos
+enemy_speed_y = 0.5  # Velocidad inicial de los enemigos
+bullet_speed_x = 0.35
+bullet_speed_y = 0.35
+player_speed_x = 0.5
 itsover = False
 
 # variable para el estado de los proyectiles de los enemigos
@@ -126,7 +130,7 @@ def iscollision(enemyx, enemyy, bulletx, bullety):
 
 
 def iscollision_player(x, y, bulletx, bullety):
-    distance = math.sqrt((math.pow(x - bulletx, 2)) + (math.pow(y - bullety, 2)))
+    distance = math.sqrt((math.pow((x + playerwidth/2.0) - bulletx, 2)) + (math.pow(y - bullety, 2)))
     if distance < 30:
         return True
     else:
@@ -156,9 +160,9 @@ while running:
         # if keystroke in pressed whether it is right of left
         if (event.type == pygame.KEYDOWN):
             if (event.key == pygame.K_LEFT):
-                playerx_change = -3.0
+                playerx_change = -3.0 * player_speed_x
             if (event.key == pygame.K_RIGHT):
-                playerx_change = 3.0
+                playerx_change = 3.0 * player_speed_x
 
             if (event.key == pygame.K_SPACE):
                 if bullet_state == "ready":
@@ -208,8 +212,8 @@ while running:
                 enemy_bulletx_change[i] = random.choice(values_random)
                 fire_enemy_bullet(enemy_bulletx[i], enemy_bullety[i], i)
             elif enemy_bullet_state[i] == "fire":
-                enemy_bulletx[i] += enemy_bulletx_change[i]
-                enemy_bullety[i] += 0.75
+                enemy_bulletx[i] += enemy_bulletx_change[i]  * bullet_speed_x
+                enemy_bullety[i] += 0.75 * bullet_speed_x
                 fire_enemy_bullet(enemy_bulletx[i], enemy_bullety[i], i)
 
             if enemy_bullety[i] >= 620:
