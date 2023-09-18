@@ -40,6 +40,8 @@ enemyy_change = []
 number_of_enemies = 6
 enemy_speed_x = 1.0  # Velocidad inicial de los enemigos
 enemy_speed_y = 1.0  # Velocidad inicial de los enemigos
+enemywidth = 94
+enemyheight = 80
 itsover = False
 
 # variable para el estado de los proyectiles de los enemigos
@@ -77,6 +79,8 @@ bulletx_change = 0
 bullety_change = 10 * enemy_speed_x
 bullet_state = "ready"
 bullet_auto_state = "ready"
+bulletwidth = 12
+bulletheight = 49
 
 # score
 score_value = 0
@@ -112,7 +116,7 @@ def enemy(x, y, i):
 def fire_enemy_bullet(x, y, i):
     global enemy_bullet_state
     enemy_bullet_state[i] = "fire"
-    screen.blit(enemybulletimg[i], (x + 32, y + 32))
+    screen.blit(enemybulletimg[i], (x, y))
 
 
 def fire_bullet(x, y):
@@ -122,7 +126,8 @@ def fire_bullet(x, y):
 
 
 def iscollision(enemyx, enemyy, bulletx, bullety):
-    distance = math.sqrt((math.pow(enemyx - bulletx, 2)) + (math.pow(enemyy - bullety, 2)))
+    distance = math.sqrt((math.pow((enemyx + enemywidth/2.0) - (bulletx + bulletwidth/2.0), 2)) +
+                         (math.pow((enemyy + enemyheight/2.0) - (bullety + bulletheight/2.0), 2)))
     if distance < 50:
         return True
     else:
@@ -132,8 +137,8 @@ def iscollision(enemyx, enemyy, bulletx, bullety):
 def iscollision_player(x, y, bulletx, bullety):
     distance = math.sqrt((math.pow((x + playerwidth/2.0) - (bulletx + enemy_bullet_width/2.0), 2)) +
                          (math.pow((y + playerheight/2.0) - (bullety + enemy_bullet_height/2.0), 2)))
-    print (x + playerwidth/2.0)
-    if distance < 50:
+    print (distance)
+    if distance < 40:
         return True
     else:
         return False
@@ -209,22 +214,21 @@ while running:
                 enemyy[i] += enemyy_change[i] * enemy_speed_y
 
             # Comprueba si el enemigo está listo para disparar, y un número aleatorio cumple con la condición
-            if enemy_bullet_state[i] == "ready" and random.randint(1, 1000) == 1:
+            if enemy_bullet_state[i] == "ready" and random.randint(1, 500) == 1:
                 values_random = [-1, 0, 1]
-                enemy_bulletx[i] = enemyx[i]
-                enemy_bullety[i] = enemyy[i]
+                enemy_bulletx[i] = enemyx[i] + 32
+                enemy_bullety[i] = enemyy[i] + 32
                 enemy_bulletx_change[i] = random.choice(values_random)
                 fire_enemy_bullet(enemy_bulletx[i], enemy_bullety[i], i)
             elif enemy_bullet_state[i] == "fire":
                 enemy_bulletx[i] += enemy_bulletx_change[i]
                 enemy_bullety[i] += 0.75
                 fire_enemy_bullet(enemy_bulletx[i], enemy_bullety[i], i)
+                if iscollision_player(playerx, playery, enemy_bulletx[i], enemy_bullety[i]):
+                    itsover = True
 
             if enemy_bullety[i] >= 620:
                 enemy_bullet_state[i] = "ready"
-
-            if iscollision_player(playerx, playery, enemy_bulletx[i], enemy_bullety[i]):
-                itsover = True
 
             # collision
             collision = iscollision(enemyx[i], enemyy[i], bulletx, bullety)
@@ -263,5 +267,6 @@ while running:
 
     player(playerx, playery)
     show_score(textx, texty)
+
+    clock.tick(800)  # Limitar el framerate a 60 FPS
     pygame.display.update()
-    clock.tick(400)  # Limitar el framerate a 60 FPS
